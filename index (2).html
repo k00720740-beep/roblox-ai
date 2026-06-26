@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Studio AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #e2231a;
+  --red-dark: #b01a13;
+  --black: #0d0d0d;
+  --black2: #161616;
+  --black3: #1f1f1f;
+  --white: #ffffff;
+  --gray: #888;
+  --green: #00c853;
+  --font: 'Tajawal', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--black); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(13,13,13,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid #222;
+  display: flex; align-items: center; padding: 0 32px; height: 60px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.nav-logo-icon {
+  width: 34px; height: 34px; background: var(--red); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 18px; color: white; transform: rotate(-4deg);
+}
+.nav-logo span { font-size: 17px; font-weight: 700; }
+.nav-logo span em { color: var(--red); font-style: normal; }
+.nav-links { display: flex; gap: 6px; margin-right: auto; }
+.nav-link {
+  padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 500;
+  color: #aaa; cursor: pointer; transition: all 0.15s;
+  border: none; background: none; font-family: var(--font);
+}
+.nav-link:hover { color: white; background: #222; }
+.nav-link.active { color: white; background: #222; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HOME */
+.hero {
+  padding: 140px 40px 80px; text-align: center; position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at top, rgba(226,35,26,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(226,35,26,0.12); border: 1px solid rgba(226,35,26,0.3);
+  border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 500;
+  color: #ff6b63; margin-bottom: 28px;
+}
+.hero h1 { font-size: clamp(38px,7vw,70px); font-weight: 900; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 20px; }
+.hero h1 .red { color: var(--red); }
+.hero p { font-size: 18px; color: #777; max-width: 540px; margin: 0 auto 36px; line-height: 1.7; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--red); color: white; border: none; border-radius: 10px;
+  padding: 13px 28px; font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+}
+.btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); }
+.btn-secondary {
+  background: transparent; color: white; border: 1px solid #333; border-radius: 10px;
+  padding: 13px 28px; font-size: 15px; font-weight: 500; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+}
+.btn-secondary:hover { background: #1a1a1a; border-color: #555; }
+
+.stats {
+  display: flex; justify-content: center; gap: 60px; padding: 48px 40px;
+  border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-num { font-size: 36px; font-weight: 900; color: var(--red); letter-spacing: -1px; }
+.stat-label { font-size: 13px; color: #555; margin-top: 4px; }
+
+.section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; }
+.section-tag {
+  display: inline-block; background: rgba(226,35,26,0.1); color: var(--red);
+  border-radius: 4px; padding: 4px 10px; font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;
+}
+.section-title { font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+.section-sub { color: #555; font-size: 16px; margin-bottom: 48px; max-width: 500px; line-height: 1.6; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 16px; }
+.feature-card {
+  background: var(--black2); border: 1px solid #222; border-radius: 14px;
+  padding: 24px; transition: border-color 0.2s, transform 0.2s;
+}
+.feature-card:hover { border-color: rgba(226,35,26,0.4); transform: translateY(-2px); }
+.feature-icon {
+  width: 44px; height: 44px; background: rgba(226,35,26,0.1); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;
+}
+.feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.feature-card p { font-size: 14px; color: #555; line-height: 1.6; }
+
+footer { text-align: center; padding: 40px; border-top: 1px solid #1a1a1a; color: #333; font-size: 13px; }
+footer span { color: var(--red); }
+
+/* CHAT PAGE */
+#chat-page { padding-top: 60px; height: 100vh; display: none; flex-direction: column; }
+#chat-page.active { display: flex; }
+
+.chat-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+.chat-sidebar {
+  width: 220px; background: var(--black2); border-left: 1px solid #1a1a1a;
+  padding: 20px 14px; flex-shrink: 0; overflow-y: auto;
+}
+.sidebar-title { font-size: 11px; font-weight: 700; color: #333; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.sidebar-item {
+  padding: 9px 12px; border-radius: 8px; font-size: 13px; color: #666;
+  cursor: pointer; margin-bottom: 4px; transition: all 0.15s; border: 1px solid transparent;
+}
+.sidebar-item:hover { background: #1a1a1a; color: white; }
+.sidebar-item.active { background: rgba(226,35,26,0.1); color: white; border-color: rgba(226,35,26,0.2); }
+
+/* Owner badge */
+.owner-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(226,35,26,0.15); border: 1px solid rgba(226,35,26,0.3);
+  border-radius: 8px; padding: 8px 12px; margin-bottom: 16px;
+  font-size: 12px; color: #ff6b63; font-weight: 600;
+}
+
+/* Limit bar */
+.limit-bar {
+  margin-bottom: 16px; background: #1a1a1a; border: 1px solid #222;
+  border-radius: 8px; padding: 10px 12px;
+}
+.limit-bar-label { font-size: 11px; color: #444; margin-bottom: 6px; }
+.limit-bar-track { background: #2a2a2a; border-radius: 4px; height: 4px; overflow: hidden; }
+.limit-bar-fill { background: var(--red); height: 4px; border-radius: 4px; transition: width 0.4s; }
+.limit-bar-count { font-size: 11px; color: #555; margin-top: 5px; text-align: center; }
+
+.chat-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-topbar {
+  padding: 14px 24px; border-bottom: 1px solid #1a1a1a;
+  display: flex; align-items: center; gap: 12px; background: var(--black);
+}
+.chat-topbar-ai {
+  width: 32px; height: 32px; background: var(--red); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
+}
+.online-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin-right: auto; box-shadow: 0 0 6px var(--green); }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  scrollbar-width: thin; scrollbar-color: #222 transparent;
+}
+.msg { display: flex; gap: 12px; align-items: flex-start; max-width: 80%; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.msg-avatar.ai { background: var(--red); color: white; font-size: 13px; }
+.msg-avatar.user-av { background: #2a2a2a; color: #aaa; }
+.msg-avatar.owner-av { background: linear-gradient(135deg,#e2231a,#ff6b63); color: white; }
+.msg-bubble {
+  background: var(--black3); border: 1px solid #2a2a2a; border-radius: 12px;
+  padding: 12px 16px; font-size: 14px; line-height: 1.65; color: #ddd; max-width: 100%;
+}
+.msg.user .msg-bubble { background: #252525; border-color: #333; }
+.msg.owner .msg-bubble { background: rgba(226,35,26,0.08); border-color: rgba(226,35,26,0.25); }
+
+.code-block {
+  background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px;
+  padding: 14px 14px 12px; margin-top: 10px; font-family: var(--mono); font-size: 12px;
+  line-height: 1.75; color: #cdd6f4; overflow-x: auto; position: relative;
+}
+.code-lang { position: absolute; top: 8px; left: 12px; font-size: 10px; color: #333; font-weight: 700; letter-spacing: 1px; }
+.kw { color: #cba6f7; } .fn { color: #89dceb; } .str { color: #a6e3a1; } .cm { color: #45475a; } .num { color: #fab387; }
+
+.quick-chips {
+  display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 24px;
+  border-top: 1px solid #1a1a1a; background: var(--black);
+}
+.q-chip {
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px;
+  padding: 6px 14px; font-size: 12px; color: #666; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font); white-space: nowrap;
+}
+.q-chip:hover { color: white; border-color: var(--red); background: rgba(226,35,26,0.08); }
+
+.chat-input-area { padding: 14px 24px; border-top: 1px solid #1a1a1a; background: var(--black); }
+
+/* Limit reached banner */
+.limit-banner {
+  background: rgba(226,35,26,0.08); border: 1px solid rgba(226,35,26,0.2);
+  border-radius: 10px; padding: 14px 18px; text-align: center;
+  color: #ff6b63; font-size: 14px; margin-bottom: 12px; display: none;
+}
+
+/* Password modal */
+.pw-modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center; z-index: 999;
+  display: none;
+}
+.pw-modal-bg.show { display: flex; }
+.pw-modal {
+  background: var(--black2); border: 1px solid #333; border-radius: 16px;
+  padding: 32px; width: 340px; text-align: center;
+}
+.pw-modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.pw-modal p { font-size: 14px; color: #555; margin-bottom: 20px; }
+.pw-modal input {
+  width: 100%; background: var(--black3); border: 1px solid #333; border-radius: 10px;
+  padding: 11px 16px; font-size: 14px; color: white; font-family: var(--font);
+  outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 2px;
+}
+.pw-modal input:focus { border-color: rgba(226,35,26,0.5); }
+.pw-modal-btn {
+  width: 100%; background: var(--red); color: white; border: none;
+  border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: background 0.15s;
+}
+.pw-modal-btn:hover { background: var(--red-dark); }
+.pw-error { font-size: 13px; color: #ff6b63; margin-top: 8px; display: none; }
+.pw-skip { font-size: 13px; color: #444; margin-top: 12px; cursor: pointer; }
+.pw-skip:hover { color: #666; }
+
+.chat-input-row { display: flex; gap: 10px; align-items: center; }
+.chat-input-row input {
+  flex: 1; background: var(--black3); border: 1px solid #2a2a2a; border-radius: 10px;
+  padding: 11px 16px; font-size: 14px; color: white; font-family: var(--font); outline: none; transition: border-color 0.15s;
+}
+.chat-input-row input:focus { border-color: rgba(226,35,26,0.5); }
+.chat-input-row input::placeholder { color: #333; }
+.send-btn {
+  width: 42px; height: 42px; background: var(--red); border: none; border-radius: 10px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px; transition: all 0.15s; flex-shrink: 0;
+}
+.send-btn:hover { background: var(--red-dark); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing-dots span {
+  width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: blink 1.2s infinite; opacity: 0.4;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.3;transform:scale(0.9)} 40%{opacity:1;transform:scale(1.1)} }
+
+/* LIBRARY */
+.code-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.code-cat {
+  padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; border: 1px solid #333; color: #666;
+  background: transparent; font-family: var(--font);
+}
+.code-cat:hover { color: white; border-color: #555; background: #1a1a1a; }
+.code-cat.active { background: var(--red); color: white; border-color: var(--red); }
+.snippets-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 16px; }
+.snippet-card { background: var(--black2); border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+.snippet-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #1a1a1a; }
+.snippet-header h4 { font-size: 14px; font-weight: 600; }
+.snippet-tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; background: rgba(226,35,26,0.15); color: #ff6b63; }
+.snippet-code {
+  font-family: var(--mono); font-size: 12px; color: #cdd6f4; padding: 14px 16px;
+  line-height: 1.75; background: #111; overflow-x: auto; min-height: 100px;
+}
+.snippet-footer { padding: 10px 16px; display: flex; justify-content: flex-end; }
+.copy-btn {
+  font-size: 12px; color: #555; background: none; border: 1px solid #2a2a2a;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-family: var(--font);
+}
+.copy-btn:hover { color: white; border-color: #555; }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-modal-bg" id="pwModal">
+  <div class="pw-modal">
+    <div style="font-size:32px;margin-bottom:12px;">🔐</div>
+    <h3>دخول الصانع</h3>
+    <p>أدخل كلمة السر للحصول على صلاحيات كاملة بدون حدود</p>
+    <input type="password" id="pwInput" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkPw()" />
+    <button class="pw-modal-btn" onclick="checkPw()">دخول ✓</button>
+    <div class="pw-error" id="pwError">❌ كلمة السر خاطئة</div>
+    <div class="pw-skip" onclick="closeModal()">دخول كزائر (10 رسائل/يوم)</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">R</div>
+    <span>Roblox Studio <em>AI</em></span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('home')">الرئيسية</button>
+    <button class="nav-link" onclick="showPage('chat')">المساعد</button>
+    <button class="nav-link" onclick="showPage('library')">مكتبة الكودات</button>
+    <button class="nav-link" id="ownerNavBtn" onclick="openModal()" style="color:#ff6b63;display:none;">🔐 صانع الموقع</button>
+  </div>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<div id="home-page" class="page active" style="padding-top:60px;">
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge">✦ مدعوم بذكاء اصطناعي متقدم</div>
+    <h1>اصنع ألعاب Roblox<br><span class="red">بقوة الذكاء الاصطناعي</span></h1>
+    <p>مساعدك الذكي لـ Roblox Studio. اكتب كود Lua، حل الأخطاء، وتعلم بناء أي ميكانيك في ثوانٍ.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('chat')">🤖 ابدأ المحادثة</button>
+      <button class="btn-secondary" onclick="showPage('library')">📚 مكتبة الكودات</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">أسئلة بلا حدود للصانع</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">رسائل يومية للزوار</div></div>
+    <div class="stat"><div class="stat-num">30+</div><div class="stat-label">كود جاهز</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">متاح دائماً</div></div>
+  </div>
+  <div class="section">
+    <div class="section-tag">المميزات</div>
+    <div class="section-title">كل شي تحتاجه في مكان واحد</div>
+    <div class="section-sub">من كتابة الكود إلى حل الأخطاء، المساعد يفهم Roblox Studio من الداخل.</div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>كود Lua فوري</h3><p>صف اللي تبيه بالعربي وخذ الكود جاهز في ثوانٍ مع شرح كل سطر.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔍</div><h3>تشخيص الأخطاء</h3><p>الصق كودك والـ AI يكتشف المشكلة ويصلحها مباشرةً.</p></div>
+      <div class="feature-card"><div class="feature-icon">🎮</div><h3>Gameplay Mechanics</h3><p>أنظمة كاملة: سلاح، قفز، ليدربورد، انفجارات، أبواب ذكية وأكثر.</p></div>
+      <div class="feature-card"><div class="feature-icon">💾</div><h3>DataStore & Saving</h3><p>تعلم كيف تحفظ بيانات اللاعبين بشكل صحيح وآمن.</p></div>
+      <div class="feature-card"><div class="feature-icon">🌐</div><h3>Remote Events</h3><p>فهم الفرق بين Server و Client وكيف تربطهم بـ RemoteEvents.</p></div>
+      <div class="feature-card"><div class="feature-icon">📚</div><h3>مكتبة كودات</h3><p>أكثر من 30 كود جاهز منظّم بالتصنيف، انسخ واستخدم مباشرةً.</p></div>
+    </div>
+  </div>
+  <footer><p>صُنع بـ ❤️ · <span>Roblox Studio AI</span> · جميع الحقوق محفوظة</p></footer>
+</div>
+
+<!-- ═══ CHAT ═══ -->
+<div id="chat-page" class="page">
+  <div class="chat-wrapper">
+    <div class="chat-sidebar">
+      <!-- Owner badge (hidden by default) -->
+      <div class="owner-badge" id="ownerBadge" style="display:none;">
+        👑 أنت الصانع — بدون حدود
+      </div>
+      <!-- Limit bar (shown for guests) -->
+      <div class="limit-bar" id="limitBar">
+        <div class="limit-bar-label">رسائلك اليوم</div>
+        <div class="limit-bar-track"><div class="limit-bar-fill" id="limitFill" style="width:0%"></div></div>
+        <div class="limit-bar-count" id="limitCount">0 / 10</div>
+      </div>
+
+      <div class="sidebar-title">مواضيع</div>
+      <div class="sidebar-item active" onclick="quickAsk('مرحباً! شو تقدر تساعدني فيه؟')">👋 مرحباً</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أسوي Leaderboard يعرض نقاط اللاعبين؟')">🏆 Leaderboard</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أسوي سلاح يطلق رصاص في Roblox؟')">🔫 سلاح Gun</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أحفظ بيانات اللاعب بـ DataStore؟')">💾 DataStore</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أسوي باب يفتح لما لاعب يقترب منه؟')">🚪 باب ذكي</div>
+      <div class="sidebar-item" onclick="quickAsk('ما الفرق بين Script و LocalScript؟')">📜 Script vs Local</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أسوي انفجار عند لمس Part؟')">💥 انفجار</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أغيّر سرعة اللاعب WalkSpeed؟')">🏃 WalkSpeed</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أسوي NPC يمشي ويتبع اللاعب؟')">🤖 NPC</div>
+      <div class="sidebar-item" onclick="quickAsk('كيف أستخدم RemoteEvents بين Server و Client؟')">🔗 RemoteEvents</div>
+
+      <div style="margin-top:auto;padding-top:20px;">
+        <div style="font-size:11px;color:#2a2a2a;text-align:center;cursor:pointer;" onclick="openModal()">🔐 دخول الصانع</div>
+      </div>
+    </div>
+
+    <div class="chat-main">
+      <div class="chat-topbar">
+        <div class="chat-topbar-ai">AI</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;">Roblox Studio AI</div>
+          <div style="font-size:12px;color:#333;" id="chatSubtitle">مساعدك الذكي للزوار</div>
+        </div>
+        <div class="online-dot"></div>
+      </div>
+
+      <div class="chat-messages" id="chatMsgs">
+        <div class="msg ai">
+          <div class="msg-avatar ai">AI</div>
+          <div class="msg-bubble">
+            الحمد لله بخير! 😊 كيف أنت؟<br><br>
+            أنا هنا وجاهز أساعدك في أي شيء يخص <strong>Roblox Studio</strong> أو <strong>برمجة Lua</strong>. سواء كان سكريبت، جيم ميكانيك، أو UI — قولي وش تحتاج! 🎮<br><br>
+            الزوار يحصلون على <strong>10 رسائل يومياً</strong>. اختر موضوع من القائمة أو اكتب سؤالك! ✨
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-chips">
+        <div class="q-chip" onclick="quickAsk('كيف أسوي انفجار؟')">💥 انفجار</div>
+        <div class="q-chip" onclick="quickAsk('كيف أسوي Shop لبيع أشياء؟')">🛒 Shop</div>
+        <div class="q-chip" onclick="quickAsk('كيف أسوي Respawn مخصص؟')">♻️ Respawn</div>
+        <div class="q-chip" onclick="quickAsk('كيف أسوي Timer للعبة؟')">⏱️ Timer</div>
+        <div class="q-chip" onclick="quickAsk('حل مشكلة في كودي')">🔧 تشخيص</div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="limit-banner" id="limitBanner">
+          ⛔ وصلت الحد اليومي (10 رسائل). ارجع غداً أو <span style="color:#ff6b63;cursor:pointer;" onclick="openModal()">سجّل ككصانع 🔐</span>
+        </div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="اسأل عن أي شي في Roblox Studio..." onkeydown="if(event.key==='Enter')sendChat()" />
+          <button class="send-btn" id="sendBtn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LIBRARY ═══ -->
+<div id="library-page" class="page" style="padding-top:60px;">
+  <div class="section">
+    <div class="section-tag">مكتبة الكودات</div>
+    <div class="section-title">كودات جاهزة للاستخدام</div>
+    <div class="section-sub">انسخ أي كود وضعه في Roblox Studio مباشرةً. كلها مجربة!</div>
+    <div class="code-cats">
+      <button class="code-cat active" onclick="filterSnippets('all',this)">الكل</button>
+      <button class="code-cat" onclick="filterSnippets('gameplay',this)">Gameplay</button>
+      <button class="code-cat" onclick="filterSnippets('ui',this)">UI & GUI</button>
+      <button class="code-cat" onclick="filterSnippets('data',this)">Data</button>
+      <button class="code-cat" onclick="filterSnippets('effects',this)">Effects</button>
+    </div>
+    <div class="snippets-grid" id="snippetsGrid"></div>
+  </div>
+  <footer><p>صُنع بـ ❤️ · <span>Roblox Studio AI</span> · جميع الحقوق محفوظة</p></footer>
+</div>
+
+<script>
+// ── CONFIG ──
+const GEMINI_KEY = 'AQ.Ab8RN6JvF6oRe2Wp5kQv2ftmmhbzISLWDqT4CzXlfNDSkBAg-w';
+const OWNER_PASSWORD = 'khaledamk0987654321';
+const DAILY_LIMIT = 10;
+const TODAY = new Date().toDateString();
+
+// ── STATE ──
+let isOwner = false;
+let chatHistory = [];
+
+// ── USAGE (localStorage-based daily counter) ──
+function getUsage() {
+  try {
+    const raw = localStorage.getItem('roblox_ai_usage');
+    if (!raw) return { date: TODAY, count: 0 };
+    const data = JSON.parse(raw);
+    if (data.date !== TODAY) return { date: TODAY, count: 0 };
+    return data;
+  } catch(e) { return { date: TODAY, count: 0 }; }
+}
+function saveUsage(count) {
+  try { localStorage.setItem('roblox_ai_usage', JSON.stringify({ date: TODAY, count })); } catch(e){}
+}
+function getRemainingMessages() {
+  if (isOwner) return Infinity;
+  return Math.max(0, DAILY_LIMIT - getUsage().count);
+}
+function incrementUsage() {
+  if (isOwner) return;
+  const u = getUsage();
+  saveUsage(u.count + 1);
+}
+
+// ── UPDATE LIMIT UI ──
+function updateLimitUI() {
+  const u = getUsage();
+  const count = isOwner ? 0 : u.count;
+  const pct = isOwner ? 0 : Math.min(100, (count / DAILY_LIMIT) * 100);
+
+  document.getElementById('limitFill').style.width = pct + '%';
+  document.getElementById('limitCount').textContent = isOwner ? '∞ رسائل' : count + ' / ' + DAILY_LIMIT;
+  document.getElementById('limitBar').style.display = isOwner ? 'none' : 'block';
+  document.getElementById('ownerBadge').style.display = isOwner ? 'flex' : 'none';
+  document.getElementById('chatSubtitle').textContent = isOwner ? '👑 وضع الصانع — بدون حدود' : 'مساعدك الذكي للزوار';
+
+  const reached = !isOwner && getRemainingMessages() === 0;
+  document.getElementById('limitBanner').style.display = reached ? 'block' : 'none';
+  document.getElementById('chatInput').disabled = reached;
+  document.getElementById('sendBtn').disabled = reached;
+}
+
+// ── PASSWORD MODAL ──
+function openModal() {
+  document.getElementById('pwModal').classList.add('show');
+  setTimeout(() => document.getElementById('pwInput').focus(), 100);
+}
+function closeModal() {
+  document.getElementById('pwModal').classList.remove('show');
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').style.display = 'none';
+}
+function checkPw() {
+  const val = document.getElementById('pwInput').value.trim();
+  if (val === OWNER_PASSWORD) {
+    isOwner = true;
+    closeModal();
+    updateLimitUI();
+    document.getElementById('ownerNavBtn').style.display = 'none';
+    addMessage('ai', '👑 أهلاً يا خالد يا صانع الماب! وصلت بصلاحيات كاملة — رسائل بلا حدود. جاهز أكتب لك أقوى الأكواد اللي تطلبها! 🚀🔥');
+    showPage('chat');
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+// ── PAGE ROUTING ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(name + '-page').classList.add('active');
+  const idx = {home:0,chat:1,library:2}[name];
+  document.querySelectorAll('.nav-link')[idx]?.classList.add('active');
+  updateLimitUI();
+}
+
+// ── CHAT ──
+const SYSTEM_PROMPT = `أنت "Roblox Studio AI" — أقوى مساعد ذكاء اصطناعي متخصص في Roblox Studio وبرمجة Lua على الإطلاق.
+
+🔧 هويتك:
+صانعك هو خالد، مطور Roblox محترف وصانع الماب. إذا سألك أحد "مين صانعك؟" قل: "صنعني خالد، مطور Roblox محترف وصانع الماب! 👑".
+تتكلم العربية بشكل ودي وواضح. الكود دائماً بالإنجليزية.
+
+💡 أسلوب ردودك:
+- سؤال بسيط: اشرح بوضوح ثم أعطِ مثال عملي.
+- طلب كود: اكتب الكود كاملاً ومتقناً، ثم اشرح كل جزء مهم منه.
+- كود فيه خطأ: حدد المشكلة بالضبط، اشرح السبب، وأعطِ الكود المصحح.
+- دايماً أضف تحسينات وأفكار إضافية — فاجئه بحلول أذكى.
+
+⚡ معايير الكود:
+- كود نظيف ومنظم مع تعليقات توضيحية على كل جزء مهم.
+- استخدم pcall لحماية الكود من الأخطاء عند الحاجة.
+- ضع المتغيرات والإعدادات في Config section أعلى الكود لسهولة التعديل.
+- استخدم task.wait بدل wait القديمة دايماً.
+- تعامل مع edge cases: Character مو موجود، Humanoid nil، إلخ.
+- قسّم الأنظمة الكبيرة إلى وظائف منفصلة واضحة.
+- Server-side آمن: لا تثق بالـ Client، تحقق دايماً من الـ Server.
+
+📚 خبرتك تغطي:
+RemoteEvents/RemoteFunctions, DataStoreService مع retry logic, TweenService, BodyMovers والـ Constraints, GUI متقدمة, Raycast للبنادق, CollectionService, ModuleScripts, Pathfinding للـ NPC الذكي, MarketplaceService, أنظمة Round-based وTeam وInventory وQuest.
+
+لما تكتب كود Lua استخدم هذا الفورمات بالضبط:
+<lua>
+-- الكود هنا
+</lua>
+لا تستخدم markdown backticks أبداً. فقط <lua> tags للكود.`;
+
+function addMessage(role, text) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  const isOwnerMsg = role === 'owner';
+  div.className = 'msg ' + (role === 'ai' ? 'ai' : isOwnerMsg ? 'user owner' : 'user');
+
+  const av = document.createElement('div');
+  av.className = 'msg-avatar ' + (role === 'ai' ? 'ai' : isOwnerMsg ? 'owner-av' : 'user-av');
+  av.textContent = role === 'ai' ? 'AI' : isOwnerMsg ? '👑' : 'أنت';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  if (role === 'ai') { bubble.innerHTML = renderMsg(text); }
+  else { bubble.textContent = text; }
+
+  div.appendChild(av);
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderMsg(text) {
+  let out = '';
+  const parts = text.split(/<lua>|<\/lua>/);
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      out += '<span>' + parts[i].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') + '</span>';
+    } else {
+      out += '<div class="code-block"><span class="code-lang">LUA</span>' + highlight(parts[i].trim()) + '</div>';
+    }
+  }
+  return out;
+}
+
+function highlight(code) {
+  return code
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(--[^\n]*)/g,'<span class="cm">$1</span>')
+    .replace(/\b(local|function|end|if|then|else|elseif|for|do|while|return|true|false|nil|and|or|not|repeat|until|in)\b/g,'<span class="kw">$1</span>')
+    .replace(/"([^"]*)"/g,'<span class="str">"$1"</span>')
+    .replace(/'([^']*)'/g,"<span class='str'>'$1'</span>")
+    .replace(/\b(\d+\.?\d*)\b/g,'<span class="num">$1</span>')
+    .replace(/\b(game|workspace|script|wait|print|Instance\.new|Vector3\.new|CFrame\.new|math\.\w+|task\.wait|task\.spawn|Players|RunService|Debris)\b/g,'<span class="fn">$1</span>')
+    .replace(/\n/g,'<br>');
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typingIndicator';
+  div.innerHTML = '<div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() { const t = document.getElementById('typingIndicator'); if(t) t.remove(); }
+
+async function sendChat() {
+  if (!isOwner && getRemainingMessages() <= 0) { updateLimitUI(); return; }
+
+  const inp = document.getElementById('chatInput');
+  const btn = document.getElementById('sendBtn');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  btn.disabled = true;
+  addMessage(isOwner ? 'owner' : 'user', text);
+  chatHistory.push({ role: 'user', content: text });
+  showTyping();
+
+  if (!isOwner) { incrementUsage(); updateLimitUI(); }
+
+  try {
+    const geminiMessages = chatHistory.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: geminiMessages,
+        generationConfig: { maxOutputTokens: 2000, temperature: 0.7 }
+      })
+    });
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'لم أفهم السؤال، حاول مرة ثانية!';
+    chatHistory.push({ role: 'assistant', content: reply });
+    hideTyping();
+    addMessage('ai', reply);
+  } catch(e) {
+    hideTyping();
+    addMessage('ai', 'حدث خطأ في الاتصال، حاول مرة ثانية! 🔄');
+    if (!isOwner) {
+      const u = getUsage();
+      saveUsage(Math.max(0, u.count - 1));
+      updateLimitUI();
+    }
+  }
+
+  btn.disabled = !isOwner && getRemainingMessages() <= 0;
+}
+
+function quickAsk(q) {
+  showPage('chat');
+  document.getElementById('chatInput').value = q;
+  sendChat();
+}
+
+// ── SNIPPETS ──
+const snippets = [
+  { cat:'effects', title:'انفجار عند لمس Part', raw:`local part = script.Parent\npart.Touched:Connect(function(hit)\n    local explosion = Instance.new("Explosion")\n    explosion.Position = part.Position\n    explosion.BlastRadius = 15\n    explosion.BlastPressure = 500000\n    explosion.Parent = workspace\n    part:Destroy()\nend)`, code:`<span class="kw">local</span> part = script.Parent\npart.Touched:<span class="fn">Connect</span>(<span class="kw">function</span>(hit)\n    <span class="kw">local</span> explosion = Instance.<span class="fn">new</span>(<span class="str">"Explosion"</span>)\n    explosion.Position = part.Position\n    explosion.BlastRadius = <span class="num">15</span>\n    explosion.BlastPressure = <span class="num">500000</span>\n    explosion.Parent = workspace\n    part:<span class="fn">Destroy</span>()\n<span class="kw">end</span>)` },
+  { cat:'gameplay', title:'Leaderboard نقاط', raw:`local Players = game:GetService("Players")\nPlayers.PlayerAdded:Connect(function(player)\n    local stats = Instance.new("Folder")\n    stats.Name = "leaderstats"\n    stats.Parent = player\n    local points = Instance.new("IntValue")\n    points.Name = "Points"\n    points.Value = 0\n    points.Parent = stats\nend)`, code:`<span class="kw">local</span> Players = game:<span class="fn">GetService</span>(<span class="str">"Players"</span>)\nPlayers.PlayerAdded:<span class="fn">Connect</span>(<span class="kw">function</span>(player)\n    <span class="kw">local</span> stats = Instance.<span class="fn">new</span>(<span class="str">"Folder"</span>)\n    stats.Name = <span class="str">"leaderstats"</span>\n    stats.Parent = player\n    <span class="kw">local</span> points = Instance.<span class="fn">new</span>(<span class="str">"IntValue"</span>)\n    points.Name = <span class="str">"Points"</span>\n    points.Value = <span class="num">0</span>\n    points.Parent = stats\n<span class="kw">end</span>)` },
+  { cat:'gameplay', title:'باب يفتح عند الاقتراب', raw:`local door = script.Parent\nlocal open = false\ndoor.Touched:Connect(function(hit)\n    if hit.Parent:FindFirstChild("Humanoid") and not open then\n        open = true\n        door.Transparency = 0.8\n        door.CanCollide = false\n        task.wait(3)\n        door.Transparency = 0\n        door.CanCollide = true\n        open = false\n    end\nend)`, code:`<span class="kw">local</span> door = script.Parent\n<span class="kw">local</span> open = <span class="kw">false</span>\ndoor.Touched:<span class="fn">Connect</span>(<span class="kw">function</span>(hit)\n    <span class="kw">if</span> hit.Parent:<span class="fn">FindFirstChild</span>(<span class="str">"Humanoid"</span>) <span class="kw">and not</span> open <span class="kw">then</span>\n        open = <span class="kw">true</span>\n        door.Transparency = <span class="num">0.8</span>\n        door.CanCollide = <span class="kw">false</span>\n        task.<span class="fn">wait</span>(<span class="num">3</span>)\n        door.Transparency = <span class="num">0</span>\n        door.CanCollide = <span class="kw">true</span>\n        open = <span class="kw">false</span>\n    <span class="kw">end</span>\n<span class="kw">end</span>)` },
+  { cat:'data', title:'حفظ بيانات DataStore', raw:`local DSS = game:GetService("DataStoreService")\nlocal store = DSS:GetDataStore("PlayerData")\nlocal Players = game:GetService("Players")\nPlayers.PlayerAdded:Connect(function(p)\n    local data = store:GetAsync(p.UserId) or {Points = 0}\n    p.leaderstats.Points.Value = data.Points\nend)\nPlayers.PlayerRemoving:Connect(function(p)\n    store:SetAsync(p.UserId, {Points = p.leaderstats.Points.Value})\nend)`, code:`<span class="kw">local</span> DSS = game:<span class="fn">GetService</span>(<span class="str">"DataStoreService"</span>)\n<span class="kw">local</span> store = DSS:<span class="fn">GetDataStore</span>(<span class="str">"PlayerData"</span>)\n<span class="kw">local</span> Players = game:<span class="fn">GetService</span>(<span class="str">"Players"</span>)\nPlayers.PlayerAdded:<span class="fn">Connect</span>(<span class="kw">function</span>(p)\n    <span class="kw">local</span> data = store:<span class="fn">GetAsync</span>(p.UserId) <span class="kw">or</span> {Points = <span class="num">0</span>}\n    p.leaderstats.Points.Value = data.Points\n<span class="kw">end</span>)\nPlayers.PlayerRemoving:<span class="fn">Connect</span>(<span class="kw">function</span>(p)\n    store:<span class="fn">SetAsync</span>(p.UserId, {Points = p.leaderstats.Points.Value})\n<span class="kw">end</span>)` },
+  { cat:'effects', title:'تأثير دم عند الأذى', raw:`local char = script.Parent\nlocal hum = char:WaitForChild("Humanoid")\nhum.HealthChanged:Connect(function(hp)\n    if hp < hum.MaxHealth then\n        local blood = Instance.new("Part")\n        blood.BrickColor = BrickColor.new("Bright red")\n        blood.Size = Vector3.new(0.5, 0.5, 0.5)\n        blood.Position = char.HumanoidRootPart.Position\n        blood.Parent = workspace\n        game:GetService("Debris"):AddItem(blood, 2)\n    end\nend)`, code:`<span class="kw">local</span> char = script.Parent\n<span class="kw">local</span> hum = char:<span class="fn">WaitForChild</span>(<span class="str">"Humanoid"</span>)\nhum.HealthChanged:<span class="fn">Connect</span>(<span class="kw">function</span>(hp)\n    <span class="kw">if</span> hp &lt; hum.MaxHealth <span class="kw">then</span>\n        <span class="kw">local</span> blood = Instance.<span class="fn">new</span>(<span class="str">"Part"</span>)\n        blood.BrickColor = BrickColor.<span class="fn">new</span>(<span class="str">"Bright red"</span>)\n        blood.Size = Vector3.<span class="fn">new</span>(<span class="num">0.5</span>, <span class="num">0.5</span>, <span class="num">0.5</span>)\n        blood.Position = char.HumanoidRootPart.Position\n        blood.Parent = workspace\n        game:<span class="fn">GetService</span>(<span class="str">"Debris"</span>):<span class="fn">AddItem</span>(blood, <span class="num">2</span>)\n    <span class="kw">end</span>\n<span class="kw">end</span>)` },
+  { cat:'gameplay', title:'تغيير سرعة اللاعب', raw:`local char = script.Parent\nlocal hum = char:WaitForChild("Humanoid")\nhum.WalkSpeed = 30\nhum.JumpPower = 75\ntask.spawn(function()\n    task.wait(5)\n    hum.WalkSpeed = 16\nend)`, code:`<span class="kw">local</span> char = script.Parent\n<span class="kw">local</span> hum = char:<span class="fn">WaitForChild</span>(<span class="str">"Humanoid"</span>)\nhum.WalkSpeed = <span class="num">30</span>\nhum.JumpPower = <span class="num">75</span>\ntask.<span class="fn">spawn</span>(<span class="kw">function</span>()\n    task.<span class="fn">wait</span>(<span class="num">5</span>)\n    hum.WalkSpeed = <span class="num">16</span>\n<span class="kw">end</span>)` },
+  { cat:'ui', title:'رسالة ترحيب للاعب', raw:`local Players = game:GetService("Players")\nlocal player = Players.LocalPlayer\nlocal gui = Instance.new("ScreenGui", player.PlayerGui)\nlocal label = Instance.new("TextLabel", gui)\nlabel.Size = UDim2.new(0.5, 0, 0.1, 0)\nlabel.Position = UDim2.new(0.25, 0, 0.1, 0)\nlabel.Text = "مرحباً " .. player.Name .. "! 🎮"\nlabel.BackgroundColor3 = Color3.fromRGB(226, 35, 26)\nlabel.TextColor3 = Color3.new(1, 1, 1)\ntask.wait(4)\ngui:Destroy()`, code:`<span class="kw">local</span> Players = game:<span class="fn">GetService</span>(<span class="str">"Players"</span>)\n<span class="kw">local</span> player = Players.LocalPlayer\n<span class="kw">local</span> gui = Instance.<span class="fn">new</span>(<span class="str">"ScreenGui"</span>, player.PlayerGui)\n<span class="kw">local</span> label = Instance.<span class="fn">new</span>(<span class="str">"TextLabel"</span>, gui)\nlabel.Size = UDim2.<span class="fn">new</span>(<span class="num">0.5</span>, <span class="num">0</span>, <span class="num">0.1</span>, <span class="num">0</span>)\nlabel.Position = UDim2.<span class="fn">new</span>(<span class="num">0.25</span>, <span class="num">0</span>, <span class="num">0.1</span>, <span class="num">0</span>)\nlabel.Text = <span class="str">"مرحباً "</span> .. player.Name .. <span class="str">"! 🎮"</span>\nlabel.BackgroundColor3 = Color3.<span class="fn">fromRGB</span>(<span class="num">226</span>, <span class="num">35</span>, <span class="num">26</span>)\nlabel.TextColor3 = Color3.<span class="fn">new</span>(<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>)\ntask.<span class="fn">wait</span>(<span class="num">4</span>)\ngui:<span class="fn">Destroy</span>()` },
+  { cat:'gameplay', title:'NPC يتبع اللاعب', raw:`local npc = script.Parent\nlocal hum = npc:WaitForChild("Humanoid")\nlocal Players = game:GetService("Players")\nwhile true do\n    task.wait(0.5)\n    local nearest, dist = nil, 50\n    for _, p in Players:GetPlayers() do\n        if p.Character then\n            local d = (npc.PrimaryPart.Position - p.Character.HumanoidRootPart.Position).Magnitude\n            if d < dist then nearest = p.Character; dist = d end\n        end\n    end\n    if nearest then\n        hum:MoveTo(nearest.HumanoidRootPart.Position)\n    end\nend`, code:`<span class="kw">local</span> npc = script.Parent\n<span class="kw">local</span> hum = npc:<span class="fn">WaitForChild</span>(<span class="str">"Humanoid"</span>)\n<span class="kw">local</span> Players = game:<span class="fn">GetService</span>(<span class="str">"Players"</span>)\n<span class="kw">while true do</span>\n    task.<span class="fn">wait</span>(<span class="num">0.5</span>)\n    <span class="kw">local</span> nearest, dist = <span class="kw">nil</span>, <span class="num">50</span>\n    <span class="kw">for</span> _, p <span class="kw">in</span> Players:<span class="fn">GetPlayers</span>() <span class="kw">do</span>\n        <span class="kw">if</span> p.Character <span class="kw">then</span>\n            <span class="kw">local</span> d = (npc.PrimaryPart.Position - p.Character.HumanoidRootPart.Position).Magnitude\n            <span class="kw">if</span> d &lt; dist <span class="kw">then</span> nearest = p.Character; dist = d <span class="kw">end</span>\n        <span class="kw">end</span>\n    <span class="kw">end</span>\n    <span class="kw">if</span> nearest <span class="kw">then</span>\n        hum:<span class="fn">MoveTo</span>(nearest.HumanoidRootPart.Position)\n    <span class="kw">end</span>\n<span class="kw">end</span>` },
+  { cat:'data', title:'RemoteEvent Server ↔ Client', raw:`-- Server Script\nlocal RE = game.ReplicatedStorage:WaitForChild("MyEvent")\nRE.OnServerEvent:Connect(function(player, data)\n    print(player.Name .. " أرسل: ", data)\nend)\n\n-- LocalScript\nlocal RE = game.ReplicatedStorage:WaitForChild("MyEvent")\nRE:FireServer("مرحبا!")`, code:`<span class="cm">-- Server Script</span>\n<span class="kw">local</span> RE = game.ReplicatedStorage:<span class="fn">WaitForChild</span>(<span class="str">"MyEvent"</span>)\nRE.OnServerEvent:<span class="fn">Connect</span>(<span class="kw">function</span>(player, data)\n    <span class="fn">print</span>(player.Name .. <span class="str">" أرسل: "</span>, data)\n<span class="kw">end</span>)\n\n<span class="cm">-- LocalScript</span>\n<span class="kw">local</span> RE = game.ReplicatedStorage:<span class="fn">WaitForChild</span>(<span class="str">"MyEvent"</span>)\nRE:<span class="fn">FireServer</span>(<span class="str">"مرحبا!"</span>)` },
+  { cat:'ui', title:'Timer عداد تنازلي', raw:`local timeLeft = 60\nwhile timeLeft > 0 do\n    local mins = math.floor(timeLeft / 60)\n    local secs = timeLeft % 60\n    print(string.format("%02d:%02d", mins, secs))\n    task.wait(1)\n    timeLeft = timeLeft - 1\nend\nprint("انتهى الوقت!")`, code:`<span class="kw">local</span> timeLeft = <span class="num">60</span>\n<span class="kw">while</span> timeLeft > <span class="num">0</span> <span class="kw">do</span>\n    <span class="kw">local</span> mins = math.<span class="fn">floor</span>(timeLeft / <span class="num">60</span>)\n    <span class="kw">local</span> secs = timeLeft % <span class="num">60</span>\n    <span class="fn">print</span>(string.<span class="fn">format</span>(<span class="str">"%02d:%02d"</span>, mins, secs))\n    task.<span class="fn">wait</span>(<span class="num">1</span>)\n    timeLeft = timeLeft - <span class="num">1</span>\n<span class="kw">end</span>\n<span class="fn">print</span>(<span class="str">"انتهى الوقت!"</span>)` }
+];
+
+function filterSnippets(cat, btn) {
+  document.querySelectorAll('.code-cat').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const grid = document.getElementById('snippetsGrid');
+  grid.innerHTML = '';
+  const tagMap = { gameplay:'Gameplay', ui:'UI', data:'Data', effects:'Effects' };
+  const list = cat === 'all' ? snippets : snippets.filter(s => s.cat === cat);
+  list.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'snippet-card';
+    card.innerHTML = `<div class="snippet-header"><h4>${s.title}</h4><span class="snippet-tag">${tagMap[s.cat]}</span></div><div class="snippet-code">${s.code.replace(/\n/g,'<br>')}</div><div class="snippet-footer"><button class="copy-btn" id="cp${i}" onclick="copySnippet(${i})">نسخ الكود</button></div>`;
+    grid.appendChild(card);
+  });
+}
+
+function copySnippet(i) {
+  navigator.clipboard.writeText(snippets[i].raw).then(() => {
+    const btn = document.getElementById('cp' + i);
+    if (btn) { btn.textContent = '✓ تم النسخ'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'نسخ الكود'; btn.classList.remove('copied'); }, 2000); }
+  });
+}
+
+// ── INIT ──
+filterSnippets('all', null);
+document.querySelectorAll('.code-cat')[0]?.classList.add('active');
+updateLimitUI();
+// Show owner nav button subtly if not owner (for login access)
+document.getElementById('ownerNavBtn').style.display = isOwner ? 'none' : 'flex';
+</script>
+</body>
+</html>
